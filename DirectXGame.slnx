@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="DirectXGame.vcxproj" />
+  <Project Path="DirectXGame.vcxproj" Id="2e285c3f-73d1-41cc-b503-9e7656a083b1" />
 </Solution>
