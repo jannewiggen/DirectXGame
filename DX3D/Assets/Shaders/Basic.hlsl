@@ -10,10 +10,15 @@ struct VSOutput
     float4 color : COLOR0;
 };
 
+cbuffer ConstantData : register(b0)
+{
+    row_major float4x4 world;
+}
+
 VSOutput VSMain(VSInput input)
 {
     VSOutput output;
-    output.position = float4(input.position, 1);
+    output.position = mul(float4(input.position, 1), world);
     output.color = input.color;
     return output;
 }

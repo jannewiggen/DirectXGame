@@ -46,6 +46,7 @@ dx3d::GraphicsEngine::GraphicsEngine(const GraphicsEngineDesc& desc) : Base(desc
 	};
 
 	m_vb = device.createVertexBuffer({ vertexList, std::size(vertexList), sizeof(Vertex) });
+	m_cb = device.createConstantBuffer({ {}, sizeof(ConstantData) });
 }
 
 dx3d::GraphicsEngine::~GraphicsEngine()
@@ -58,9 +59,31 @@ GraphicsDevice& dx3d::GraphicsEngine::getGraphicsDevice() noexcept
 	return *m_graphicsDevice;
 }
 
-void dx3d::GraphicsEngine::render(SwapChain& swapChain)
+void dx3d::GraphicsEngine::render(SwapChain& swapChain, f32 deltaTime)
 {
 	auto& context = *m_deviceContext;
+	auto& cb = *m_cb;
+
+	m_pos += deltaTime * 0.5f;
+	m_rot += deltaTime * 3.14f;
+	m_scale = std::abs(std::sin(m_rot));
+
+	DX3DLogInfo("Pos: X:{} Y:{}", m_pos, m_pos);
+	DX3DLogInfo("Rot: Z:{}", m_rot);
+	DX3DLogInfo("Scale: {}", m_scale)
+
+		auto worldMat =
+		Mat4x4::scale({ m_scale,m_scale,m_scale }) *
+		Mat4x4::rotateZ(m_rot) *
+		Mat4x4::translate({ m_pos ,m_pos ,0 });
+
+	ConstantData data
+	{
+		worldMat
+	};
+
+	context.updateConstantBuffer(cb, &data);
+
 	context.clearAndSetBackBuffer(swapChain, { 0.27f, 0.39f, 0.55f, 1.0f });
 	context.setGraphicsPipelineState(*m_pipeline);
 
@@ -68,6 +91,7 @@ void dx3d::GraphicsEngine::render(SwapChain& swapChain)
 
 	auto& vb = *m_vb;
 	context.setVertexBuffer(vb);
+	context.setConstantBuffer(cb);
 	context.drawTriangleList(vb.getVertexListSize(), 0u);
 
 	auto& device = *m_graphicsDevice;
